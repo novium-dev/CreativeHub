@@ -2,6 +2,7 @@ package world.novium.creative.common.managers;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
@@ -14,6 +15,7 @@ import java.util.*;
 
 @Getter
 @RequiredArgsConstructor
+@Slf4j
 public class WarpManager {
 
     private final JavaPlugin plugin;
@@ -68,7 +70,7 @@ public class WarpManager {
         try {
             config.save(file);
         } catch (IOException e) {
-            plugin.getLogger().severe("Failed to save warps.yml: " + e.getMessage());
+            log.error("Failed to save warps.yml: {}", e.getMessage());
         }
     }
 
