@@ -7,8 +7,8 @@ import dev.triumphteam.gui.guis.GuiItem;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import world.novium.creative.managers.PlotManager;
-import world.novium.creative.managers.WorldManager;
+import world.novium.creative.common.managers.PlotManager;
+import world.novium.creative.common.managers.WorldManager;
 import world.novium.creative.utils.MessageUtils;
 
 @RequiredArgsConstructor

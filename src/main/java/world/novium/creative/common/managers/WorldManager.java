@@ -1,4 +1,4 @@
-package world.novium.creative.managers;
+package world.novium.creative.common.managers;
 
 
 import com.google.inject.Inject;

@@ -5,8 +5,8 @@ import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
-import world.novium.creative.managers.WorldManager;
-import world.novium.creative.annotations.RegisterListener;
+import world.novium.creative.common.managers.WorldManager;
+import world.novium.creative.common.annotations.RegisterListener;
 
 @RegisterListener
 public class WorldListeners implements Listener {

@@ -3,8 +3,8 @@ package world.novium.creative.commands.impl;
 import com.google.inject.Inject;
 import dev.jorel.commandapi.CommandTree;
 import world.novium.creative.commands.Command;
-import world.novium.creative.annotations.RegisterCommand;
-import world.novium.creative.managers.TranslationManager;
+import world.novium.creative.common.annotations.RegisterCommand;
+import world.novium.creative.common.managers.TranslationManager;
 
 @RegisterCommand
 public class TestCommand implements Command {
@@ -15,7 +15,7 @@ public class TestCommand implements Command {
     public CommandTree build() {
         return new CommandTree("test")
                 .executesPlayer((player, args) -> {
-                    translator.send(player, "test");
+                    translator.sendPrefixed(player, "test");
                 });
     }
 }

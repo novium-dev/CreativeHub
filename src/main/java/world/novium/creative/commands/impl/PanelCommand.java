@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import dev.jorel.commandapi.CommandTree;
 import dev.triumphteam.gui.guis.Gui;
 import world.novium.creative.commands.Command;
-import world.novium.creative.annotations.RegisterCommand;
+import world.novium.creative.common.annotations.RegisterCommand;
 import world.novium.creative.gui.PanelGUI;
 
 @RegisterCommand

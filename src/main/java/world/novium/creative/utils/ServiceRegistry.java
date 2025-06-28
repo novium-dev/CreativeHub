@@ -2,16 +2,14 @@ package world.novium.creative.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.atteo.classindex.ClassIndex;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import world.novium.creative.CreativePlugin;
 import com.google.inject.Injector;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
-import world.novium.creative.annotations.RegisterListener;
+import world.novium.creative.common.annotations.RegisterListener;
 import world.novium.creative.commands.Command;
-import world.novium.creative.annotations.RegisterCommand;
+import world.novium.creative.common.annotations.RegisterCommand;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;

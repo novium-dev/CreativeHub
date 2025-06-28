@@ -8,7 +8,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import world.novium.creative.managers.WorldManager;
+import world.novium.creative.common.managers.WorldManager;
 import world.novium.creative.utils.MessageUtils;
 
 import java.time.LocalDateTime;

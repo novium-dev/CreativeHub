@@ -8,9 +8,9 @@ import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.triumphteam.gui.guis.Gui;
 import world.novium.creative.commands.Command;
-import world.novium.creative.annotations.RegisterCommand;
+import world.novium.creative.common.annotations.RegisterCommand;
 import world.novium.creative.gui.WarpGUI;
-import world.novium.creative.managers.WarpManager;
+import world.novium.creative.common.managers.WarpManager;
 import world.novium.creative.utils.MessageUtils;
 
 @RegisterCommand

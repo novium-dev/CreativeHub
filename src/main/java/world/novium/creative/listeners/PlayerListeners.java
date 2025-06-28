@@ -7,7 +7,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import world.novium.creative.database.UserCache;
 import world.novium.creative.utils.MessageUtils;
-import world.novium.creative.annotations.RegisterListener;
+import world.novium.creative.common.annotations.RegisterListener;
 
 @RegisterListener
 public class PlayerListeners implements Listener {

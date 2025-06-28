@@ -6,8 +6,7 @@ import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import world.novium.creative.managers.WarpManager;
-import world.novium.creative.managers.WorldManager;
+import world.novium.creative.common.managers.WarpManager;
 import world.novium.creative.utils.MessageUtils;
 
 import java.util.Collection;

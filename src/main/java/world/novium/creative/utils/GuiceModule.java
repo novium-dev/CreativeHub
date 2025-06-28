@@ -11,9 +11,9 @@ import world.novium.creative.database.UserDao;
 import world.novium.creative.gui.PanelGUI;
 import world.novium.creative.gui.SnapshotGUI;
 import world.novium.creative.gui.WarpGUI;
-import world.novium.creative.managers.PlotManager;
-import world.novium.creative.managers.TranslationManager;
-import world.novium.creative.managers.WarpManager;
+import world.novium.creative.common.managers.PlotManager;
+import world.novium.creative.common.managers.TranslationManager;
+import world.novium.creative.common.managers.WarpManager;
 
 @AllArgsConstructor
 public class GuiceModule extends AbstractModule {

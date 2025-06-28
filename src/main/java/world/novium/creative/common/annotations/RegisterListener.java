@@ -1,5 +1,4 @@
-package world.novium.creative.annotations;
-
+package world.novium.creative.common.annotations;
 
 import org.atteo.classindex.IndexAnnotated;
 
@@ -11,4 +10,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @IndexAnnotated
-public @interface RegisterCommand {}
+public @interface RegisterListener {
+}

@@ -1,4 +1,4 @@
-package world.novium.creative.managers;
+package world.novium.creative.common.managers;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,11 +35,11 @@ public class TranslationManager implements StartupHook {
         Optional<Translation> translation = getTranslation(language, key);
 
         if (translation.isPresent()) {
-            return MessageUtils.parse(translation.get().getValue());
+            return MessageUtils.parse(translation.get().getValue(), tagResolvers);
         } else {
             log.warn("Translation for key '{}' in language '{}' not found.", key, language);
             return MessageUtils.parse(
-                "<red>Translation for key <gray>'" + key + "' <red>in language <gra>'" + language + "' <red>not found."
+                String.format("<red>Translation missing for key <gray>'%s' <red>in language <gray>'%s'<red>.", key, language)
             );
         }
     }
@@ -47,9 +47,7 @@ public class TranslationManager implements StartupHook {
     public Component translate(Player player, String key, TagResolver... tagResolvers) {
         Locale language = player.locale();
 
-        Component translation = getTranslationComponent(language, key, tagResolvers);
-
-        return translation;
+        return getTranslationComponent(language, key, tagResolvers);
     }
 
     public void send(Player player, String key, TagResolver... tagResolvers) {
@@ -64,30 +62,17 @@ public class TranslationManager implements StartupHook {
         player.sendMessage(MessageUtils.addPrefix(translation));
     }
 
-    @Override
-    public void onStartup() {
+    public void reloadTranslations() {
+        translations.clear();
         File translationsFile = new File(dataFolder, "lang");
         if (!translationsFile.exists()) {
-            translationsFile.mkdirs();
+            log.error("Translations directory does not exist: {}", translationsFile.getAbsolutePath());
+            return;
         }
 
         File[] files = translationsFile.listFiles((dir, name) -> name.endsWith(".yaml"));
-
         if (files == null || files.length == 0) {
             log.error("No translation files found in {}", translationsFile.getAbsolutePath());
-            List<Locale> locales = Arrays.asList(Locale.GERMAN, Locale.ENGLISH);
-
-            for (Locale locale : locales) {
-                File translationFile = new File(translationsFile, locale.toLanguageTag() + ".yaml");
-                if (!translationFile.exists()) {
-                    try {
-                        translationFile.createNewFile();
-                        log.info("Created translation file: {}", translationFile.getName());
-                    } catch (Exception e) {
-                        log.error("Failed to create translation file: {}", translationFile.getName(), e);
-                    }
-                }
-            }
             return;
         }
 
@@ -96,8 +81,7 @@ public class TranslationManager implements StartupHook {
             String languageCode = file.getName().replace(".yaml", "");
             Locale language = Locale.forLanguageTag(languageCode);
 
-            var config = YamlConfiguration.loadConfiguration(translationsFile);
-
+            YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
             for (String key : config.getKeys(false)) {
                 String message = config.getString(key);
                 if (message != null) {
@@ -110,5 +94,15 @@ public class TranslationManager implements StartupHook {
         }
 
         log.info("Loaded {} languages with translations.", translations.size());
+    }
+
+    @Override
+    public void onStartup() {
+        File translationsFile = new File(dataFolder, "lang");
+        if (!translationsFile.exists()) {
+            translationsFile.mkdirs();
+        }
+
+        reloadTranslations();
     }
 }
