@@ -1,16 +1,20 @@
 package world.novium.creative.gui;
 
+import com.google.inject.Inject;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import world.novium.creative.managers.WarpManager;
+import world.novium.creative.common.managers.WarpManager;
 import world.novium.creative.utils.MessageUtils;
 
 import java.util.Collection;
 
 public class WarpGUI {
+
+    @Inject
+    private WarpManager warpManager;
 
     /**
      * Builds and returns a GUI for displaying warps.
@@ -18,10 +22,9 @@ public class WarpGUI {
      * allowing players to click on an item to teleport to the corresponding warp location.
      *
      * @param player The player for whom the GUI is being built.
-     * @param warpManager An instance of WarpManager to retrieve warp data.
      * @return A Gui object populated with warp items and a close button.
      */
-    public static Gui buildGUI(Player player, WarpManager warpManager) {
+    public Gui buildGUI(Player player) {
         Gui gui = Gui.gui()
                 .title(MessageUtils.parse("<gradient:#00FFFF:#007FFF>Warps</gradient>"))
                 .rows(3)

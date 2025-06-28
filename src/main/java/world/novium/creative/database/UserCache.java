@@ -2,52 +2,43 @@ package world.novium.creative.database;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import dev.morphia.Datastore;
-import dev.morphia.query.filters.Filters;
+import lombok.extern.slf4j.Slf4j;
 import world.novium.creative.database.models.User;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 public class UserCache {
-    private static UserCache instance;
-
     private final Cache<UUID, User> cache;
-    private final Datastore datastore;
 
-    private UserCache(Datastore datastore) {
-        this.datastore = datastore;
+    private final UserDao userDao;
+
+    public UserCache(UserDao userDao) {
+        this.userDao = userDao;
         this.cache = Caffeine.newBuilder()
                 .expireAfterAccess(Duration.ofMinutes(10))
                 .maximumSize(1000)
                 .build();
     }
 
-    // 🔹 Static initializer
-    public static void init(Datastore datastore) {
-        if (instance == null) {
-            instance = new UserCache(datastore);
-        }
-    }
-
-    public static UserCache get() {
-        if (instance == null) {
-            throw new IllegalStateException("UserCache not initialized. Call UserCache.init(datastore) first.");
-        }
-        return instance;
-    }
-
-    // 🔹 Cache operations
     public Optional<User> get(UUID uuid) {
         return Optional.ofNullable(cache.getIfPresent(uuid));
     }
 
-    public User getOrLoad(UUID uuid) {
-        return cache.get(uuid, key -> datastore.find(User.class)
-                .filter(Filters.eq("_id", key))
-                .first());
+    private User getOrLoad(UUID uuid) {
+        return cache.get(uuid, key -> {
+            Optional<User> user = userDao.getUser(key);
+
+            return user.orElseGet(() -> {
+                log.warn("User with UUID {} not found in database, creating new user entry.", key);
+                userDao.createUser(key);
+
+                return new User(key, List.of());
+            });
+        });
     }
 
     public void put(User user) {
@@ -59,26 +50,20 @@ public class UserCache {
     }
 
     public void save(User user) {
-        datastore.save(user);
+        userDao.saveUser(user);
         put(user);
     }
 
     public void leave(UUID uuid) {
-        User user = getOrLoad(uuid);
-        if (user != null) {
-            save(user);
+        Optional<User> user = get(uuid);
+        if (user.isPresent()) {
+            save(user.get());
+            invalidate(uuid);
         }
-        invalidate(uuid);
     }
 
-    public CompletableFuture<User> getOrCreateAsync(UUID uuid) {
-        return CompletableFuture.supplyAsync(() -> {
-            User user = getOrLoad(uuid);
-            if (user == null) {
-                user = new User(uuid);
-                save(user);
-            }
-            return user;
-        });
+    public void join(UUID uuid) {
+        User user = getOrLoad(uuid);
+        put(user);
     }
 }

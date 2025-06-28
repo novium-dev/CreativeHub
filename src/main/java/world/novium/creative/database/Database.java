@@ -1,46 +1,61 @@
 package world.novium.creative.database;
 
-import com.mongodb.client.MongoClients;
-import dev.morphia.Datastore;
-import dev.morphia.Morphia;
+import com.zaxxer.hikari.HikariDataSource;
+import de.chojo.sadu.datasource.DataSourceCreator;
+import de.chojo.sadu.mapper.RowMapperRegistry;
+import de.chojo.sadu.mariadb.databases.MariaDb;
+import de.chojo.sadu.mariadb.mapper.MariaDbMapper;
+import de.chojo.sadu.queries.api.configuration.QueryConfiguration;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import world.novium.creative.database.models.User;
 
-@SuppressWarnings("removal")
+@Getter()
+@Slf4j
 public class Database {
-    private final Logger logger = LoggerFactory.getLogger(Database.class);
-    private static Datastore datastore;
-
-    public static Datastore getDatastore() {
-        if (datastore == null) {
-            throw new IllegalStateException("Datastore is not initialized. Call connect() first.");
-        }
-        return datastore;
-    }
+    private HikariDataSource datastore;
 
     public void connect(
             @NotNull ConfigurationSection configSection
     ) {
-        String host = configSection.getString("uri");
-        String database = configSection.getString("database", "creative");
+        String username = configSection.getString("username", "root");
+        String password = configSection.getString("password", "password");
+        int maxPoolSize = configSection.getInt("max-pool-size", 10);
+        int port = configSection.getInt("port", 3306);
+        String host = configSection.getString("host", "localhost");
+        String database = configSection.getString("database", "novium");
 
-        if (host == null || host.isEmpty()) {
+
+        if (host.isEmpty()) {
             throw new IllegalArgumentException("Database URI cannot be null or empty");
         }
 
-        var client = MongoClients.create(host);
+        datastore = DataSourceCreator.create(MariaDb.get()).configure(config ->
+                config.host(host)
+                .port(port)
+                .database(database)
+                .user(username)
+                .password(password)
+        )
+                .create()
+                .withMaximumPoolSize(maxPoolSize)
+                .withMinimumIdle(1)
+                .build();
 
-        datastore = Morphia.createDatastore(client, database);
+        configureDefaultQuery();
 
-        datastore.getMapper().map(User.class);
-
-        datastore.ensureIndexes();
-
-        logger.info("Connected to database");
+        log.info("Connected to database");
     }
 
+    private void configureDefaultQuery() {
+        QueryConfiguration config = QueryConfiguration.builder(datastore)
+                .setExceptionHandler(err -> log.warn(err.getMessage()))
+                .setThrowExceptions(true)
+                .setAtomic(true)
+                .setRowMapperRegistry(new RowMapperRegistry().register(MariaDbMapper.getDefaultMapper()))
+                .build();
+        QueryConfiguration.setDefault(config);
+    }
 
 }

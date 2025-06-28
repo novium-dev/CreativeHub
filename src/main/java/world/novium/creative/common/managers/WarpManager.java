@@ -1,5 +1,7 @@
-package world.novium.creative.managers;
+package world.novium.creative.common.managers;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
@@ -10,6 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+@Getter
+@RequiredArgsConstructor
 public class WarpManager {
 
     private final JavaPlugin plugin;

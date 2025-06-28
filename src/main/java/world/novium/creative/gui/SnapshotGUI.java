@@ -1,5 +1,6 @@
 package world.novium.creative.gui;
 
+import com.google.inject.Inject;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
@@ -7,7 +8,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import world.novium.creative.managers.WorldManager;
+import world.novium.creative.common.managers.WorldManager;
 import world.novium.creative.utils.MessageUtils;
 
 import java.time.LocalDateTime;
@@ -17,17 +18,22 @@ import java.util.List;
 
 public class SnapshotGUI {
 
-    private static final int SNAPSHOTS_PER_PAGE = 21;
+    private final int SNAPSHOTS_PER_PAGE = 21;
 
-    public static Gui buildSnapshotGUI(Player player, int page) {
+    @Inject
+    private WorldManager worldManager;
+
+    @Inject
+    private PanelGUI panelGUI;
+
+    public Gui buildSnapshotGUI(Player player, int page) {
         Gui gui = Gui.gui()
                 .title(MessageUtils.parse("<gradient:#00ff00:#00ffff>Welt-Snapshots</gradient>"))
                 .rows(6)
                 .disableAllInteractions()
                 .create();
-
-        // Check if player has a world
-        if (!WorldManager.worldExists(WorldManager.getWorldName(player))) {
+        
+        if (!worldManager.worldExists(worldManager.getWorldName(player))) {
             gui.setItem(3, 5, ItemBuilder.from(Material.BARRIER)
                     .name(MessageUtils.parse("<red>Keine Welt gefunden"))
                     .lore(MessageUtils.parse("<gray>Du musst zuerst eine Welt erstellen!"))
@@ -37,8 +43,7 @@ public class SnapshotGUI {
             return gui;
         }
 
-        // Get snapshots
-        String[] snapshots = WorldManager.listSnapshots(player.getUniqueId());
+        String[] snapshots = worldManager.listSnapshots(player.getUniqueId());
 
         if (snapshots.length == 0) {
             gui.setItem(3, 5, ItemBuilder.from(Material.PAPER)
@@ -49,7 +54,6 @@ public class SnapshotGUI {
             populateSnapshots(gui, player, snapshots, page);
         }
 
-        // Add create snapshot button
         gui.setItem(6, 2, ItemBuilder.from(Material.ARROW)
                 .name(MessageUtils.parse("<green>Neuen Snapshot erstellen"))
                 .lore(MessageUtils.parse(
@@ -63,11 +67,9 @@ public class SnapshotGUI {
                     gui.close(player);
                     player.sendMessage(MessageUtils.parse("<yellow>Erstelle Snapshot..."));
 
-                    if (WorldManager.createSnapshot(player.getUniqueId(), snapshotName)) {
-                        player.sendMessage(MessageUtils.parse("<green>Snapshot erfolgreich erstellt: " + snapshotName));
-                    } else {
-                        player.sendMessage(MessageUtils.parse("<red>Fehler beim Erstellen des Snapshots!"));
-                    }
+                    worldManager.createSnapshot(player.getUniqueId(), snapshotName);
+
+                    player.sendMessage(MessageUtils.parse("<green>Snapshot" + " '" + snapshotName + "' wird erstellt..."));
                 }));
 
         addNavigationItems(gui, player, page, snapshots);
@@ -75,20 +77,19 @@ public class SnapshotGUI {
         return gui;
     }
 
-    private static void populateSnapshots(Gui gui, Player player, String[] snapshots, int page) {
+    private void populateSnapshots(Gui gui, Player player, String[] snapshots, int page) {
         int startIndex = page * SNAPSHOTS_PER_PAGE;
         int endIndex = Math.min(startIndex + SNAPSHOTS_PER_PAGE, snapshots.length);
 
-        int slot = 10; // Start at row 2, column 2 (1-indexed)
+        int slot = 10;
         int itemsInRow = 0;
 
         for (int i = startIndex; i < endIndex; i++) {
             String snapshot = snapshots[i];
             String displayName = snapshot.replace(".zip", "");
 
-            // Skip to next row if we've placed 7 items in current row
             if (itemsInRow >= 7) {
-                slot += 2; // Skip the edge columns
+                slot += 2;
                 itemsInRow = 0;
             }
 
@@ -117,18 +118,16 @@ public class SnapshotGUI {
                             gui.close(player);
                             player.sendMessage(MessageUtils.parse("<yellow>Lade Snapshot..."));
 
-                            if (WorldManager.loadSnapshot(player.getUniqueId(), displayName)) {
+                            if (worldManager.loadSnapshot(player.getUniqueId(), displayName)) {
                                 player.sendMessage(MessageUtils.parse("<green>Snapshot erfolgreich geladen!"));
-                                // Teleport player to the world
-                                WorldManager.loadWorld(player);
-                                if (WorldManager.getLoadedWorld(player) != null) {
-                                    player.teleport(WorldManager.getLoadedWorld(player).getSpawnLocation());
+                                worldManager.loadWorld(player);
+                                if (worldManager.getLoadedWorld(player) != null) {
+                                    player.teleport(worldManager.getLoadedWorld(player).getSpawnLocation());
                                 }
                             } else {
                                 player.sendMessage(MessageUtils.parse("<red>Fehler beim Laden des Snapshots!"));
                             }
                         } else if (event.getClick() == ClickType.RIGHT) {
-                            // Delete snapshot with confirmation
                             openDeleteConfirmation(player, displayName);
                         }
                     });
@@ -139,7 +138,7 @@ public class SnapshotGUI {
         }
     }
 
-    private static void openDeleteConfirmation(Player player, String snapshotName) {
+    private void openDeleteConfirmation(Player player, String snapshotName) {
         Gui confirmGui = Gui.gui()
                 .title(MessageUtils.parse("<red>Snapshot löschen bestätigen"))
                 .rows(3)
@@ -154,45 +153,38 @@ public class SnapshotGUI {
         lore.add(MessageUtils.parse(""));
         lore.add(MessageUtils.parse("<red>Diese Aktion kann nicht rückgängig gemacht werden!"));
 
-
-        // Confirmation message
         confirmGui.setItem(2, 5, ItemBuilder.from(Material.PAPER)
                 .name(MessageUtils.parse("<yellow>Snapshot löschen?"))
                 .lore(lore.toArray(new Component[0]))
                 .asGuiItem());
 
-        // Confirm delete
         confirmGui.setItem(3, 3, ItemBuilder.from(Material.RED_CONCRETE)
                 .name(MessageUtils.parse("<red>Ja, löschen"))
                 .asGuiItem(event -> {
                     confirmGui.close(player);
 
-                    if (WorldManager.deleteSnapshot(player.getUniqueId(), snapshotName)) {
+                    if (worldManager.deleteSnapshot(player.getUniqueId(), snapshotName)) {
                         player.sendMessage(MessageUtils.parse("<green>Snapshot erfolgreich gelöscht!"));
                     } else {
                         player.sendMessage(MessageUtils.parse("<red>Fehler beim Löschen des Snapshots!"));
                     }
 
-                    // Reopen snapshot GUI
                     buildSnapshotGUI(player, 0).open(player);
                 }));
 
-        // Cancel
         confirmGui.setItem(3, 7, ItemBuilder.from(Material.GREEN_CONCRETE)
                 .name(MessageUtils.parse("<green>Abbrechen"))
                 .asGuiItem(event -> {
                     confirmGui.close(player);
-                    // Reopen snapshot GUI
                     buildSnapshotGUI(player, 0).open(player);
                 }));
 
         confirmGui.open(player);
     }
 
-    private static void addNavigationItems(Gui gui, Player player, int page, String[] snapshots) {
+    private void addNavigationItems(Gui gui, Player player, int page, String[] snapshots) {
         int totalPages = (int) Math.ceil((double) snapshots.length / SNAPSHOTS_PER_PAGE);
 
-        // Previous page
         if (page > 0) {
             gui.setItem(6, 4, ItemBuilder.from(Material.ARROW)
                     .name(MessageUtils.parse("<yellow>Vorherige Seite"))
@@ -200,7 +192,6 @@ public class SnapshotGUI {
                     .asGuiItem(event -> buildSnapshotGUI(player, page - 1).open(player)));
         }
 
-        // Next page
         if (page < totalPages - 1) {
             gui.setItem(6, 6, ItemBuilder.from(Material.ARROW)
                     .name(MessageUtils.parse("<yellow>Nächste Seite"))
@@ -208,7 +199,6 @@ public class SnapshotGUI {
                     .asGuiItem(event -> buildSnapshotGUI(player, page + 1).open(player)));
         }
 
-        // Page info
         if (totalPages > 1) {
             gui.setItem(6, 5, ItemBuilder.from(Material.BOOK)
                     .name(MessageUtils.parse("<white>Seite " + (page + 1) + " von " + totalPages))
@@ -216,16 +206,14 @@ public class SnapshotGUI {
                     .asGuiItem());
         }
 
-        // Back to main menu
         gui.setItem(6, 8, ItemBuilder.from(Material.BARRIER)
                 .name(MessageUtils.parse("<red>Zurück"))
                 .lore(MessageUtils.parse("<gray>Zurück zum Hauptmenü"))
                 .asGuiItem(event -> {
                     gui.close(player);
-                    PanelGUI.buildGUI(player).open(player);
+                    panelGUI.buildGUI(player).open(player);
                 }));
 
-        // Close button
         gui.setItem(6, 9, ItemBuilder.from(Material.BARRIER)
                 .name(MessageUtils.parse("<red>Schließen"))
                 .asGuiItem(event -> gui.close(player)));

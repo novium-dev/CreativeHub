@@ -1,23 +1,21 @@
-package world.novium.creative.managers;
+package world.novium.creative.common.managers;
 
 import com.plotsquared.core.PlotAPI;
 import com.plotsquared.core.player.PlotPlayer;
 import com.plotsquared.core.plot.Plot;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 
 import java.util.Set;
 
+@Getter
+@RequiredArgsConstructor
 public class PlotManager {
-    private static PlotManager self;
     private final PlotAPI plotAPI;
 
     public PlotManager() {
         this.plotAPI = new PlotAPI();
-        self = this;
-    }
-
-    public static PlotManager getInstance() {
-        return self;
     }
 
     public Set<Plot> getPlots(Player player) {

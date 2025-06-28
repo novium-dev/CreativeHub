@@ -1,49 +1,39 @@
 package world.novium.creative;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import dev.triumphteam.gui.TriumphGui;
-import org.bukkit.event.Listener;
+import lombok.Getter;
+import lombok.experimental.Accessors;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import world.novium.creative.backend.BackendServer;
-import world.novium.creative.commands.Command;
-import world.novium.creative.commands.impl.PanelCommand;
-import world.novium.creative.commands.impl.WarpCommand;
-import world.novium.creative.commands.impl.WarpsCommand;
+import world.novium.creative.common.StartupHook;
 import world.novium.creative.database.Database;
-import world.novium.creative.database.UserCache;
-import world.novium.creative.listeners.PlayerListeners;
-import world.novium.creative.listeners.WorldListeners;
-import world.novium.creative.managers.WarpManager;
+import world.novium.creative.utils.GuiceModule;
+import world.novium.creative.utils.ServiceRegistry;
 
 import java.util.List;
+import java.util.Set;
 
+@Getter
+@Accessors(fluent = true)
 public class CreativePlugin extends JavaPlugin {
-    private static CreativePlugin instance;
+    private Injector injector;
 
-    private BackendServer server;
-    private Thread serverThread;
-
-    public static CreativePlugin getInstance() {
-        return instance;
-    }
+    private ServiceRegistry registry;
 
     @Override
     public void onLoad() {
-        instance = this;
         CommandAPI.onLoad(new CommandAPIBukkitConfig(this).silentLogs(true));
     }
 
     @Override
     public void onEnable() {
-
         saveDefaultConfig();
-
-        CommandAPI.onEnable();
-
-        TriumphGui.init(this);
-
-        WarpManager warpManager = new WarpManager(this);
 
         var databaseConfig = getConfig().getConfigurationSection("database");
 
@@ -56,31 +46,26 @@ public class CreativePlugin extends JavaPlugin {
 
         database.connect(databaseConfig);
 
-        UserCache.init(Database.getDatastore());
+        injector = Guice.createInjector(new GuiceModule(this));
+        this.registry = new ServiceRegistry(this, getClassLoader(), injector);
 
-        registerListener();
-        registerCommands(warpManager);
-
-        var backendConfig = getConfig().getConfigurationSection("backend");
-        boolean backendEnabled = backendConfig != null && backendConfig.getBoolean("enabled", false);
-
-        if (backendEnabled) {
-            String authToken = backendConfig.getString("authToken", "auth-token");
-            if (authToken.isEmpty()) {
-                getLogger().severe("Backend server is enabled but no auth token is provided in the config.");
-                return;
-            }
-
-            int port = backendConfig.getInt("port", 8080);
-
-            server = new BackendServer(port, authToken);
-            serverThread = new Thread(server);
-
-            serverThread.start();
-
-            getLogger().info("Backend server started on port " + port + " with auth token: " + authToken);
+        Set<StartupHook> startupHooks = injector.getInstance(
+                Key.get(
+                        new TypeLiteral<>() {}
+                )
+        );
+        for (StartupHook hook : startupHooks) {
+            hook.onStartup();
         }
 
+        CommandAPI.onEnable();
+
+        TriumphGui.init(this);
+
+        Bukkit.getServicesManager().register(ServiceRegistry.class, registry, this, org.bukkit.plugin.ServicePriority.Normal);
+
+        this.registry.registerAllListeners();
+        this.registry.registerAllCommands();
 
         getLogger().info("CreativePlugin has been enabled!");
     }
@@ -88,37 +73,7 @@ public class CreativePlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         CommandAPI.onDisable();
-
-        if (server != null) {
-            server.stop();
-            if (serverThread != null && serverThread.isAlive()) {
-                try {
-                    serverThread.join();
-                } catch (InterruptedException e) {
-                    getLogger().severe("Failed to stop the backend server thread: " + e.getMessage());
-                }
-            }
-        }
         // Plugin shutdown logic
         getLogger().info("CreativePlugin has been disabled!");
-    }
-
-    public void registerCommands(WarpManager warpManager) {
-        List<Command> commands = List.of(
-                new PanelCommand(),
-                new WarpCommand(warpManager),
-                new WarpsCommand(warpManager)
-        );
-
-        commands.forEach(command -> command.build().register());
-    }
-
-    public void registerListener() {
-        List<Listener> listeners = List.of(
-                new WorldListeners(),
-                new PlayerListeners()
-        );
-
-        listeners.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
     }
 }
