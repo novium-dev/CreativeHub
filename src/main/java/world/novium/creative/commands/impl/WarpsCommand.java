@@ -1,23 +1,22 @@
 package world.novium.creative.commands.impl;
 
+import com.google.inject.Inject;
 import dev.jorel.commandapi.CommandTree;
 import dev.triumphteam.gui.guis.Gui;
 import world.novium.creative.commands.Command;
+import world.novium.creative.annotations.RegisterCommand;
 import world.novium.creative.gui.WarpGUI;
-import world.novium.creative.managers.WarpManager;
 
+@RegisterCommand
 public class WarpsCommand implements Command {
-    private final WarpManager manager;
-
-    public WarpsCommand(WarpManager manager) {
-        this.manager = manager;
-    }
+    @Inject
+    private WarpGUI warpGUI;
 
     @Override
     public CommandTree build() {
         return new CommandTree("warps")
                 .executesPlayer((player, args) -> {
-                    Gui gui = WarpGUI.buildGUI(player, manager);
+                    Gui gui = warpGUI.buildGUI(player);
 
                     gui.open(player);
                 });

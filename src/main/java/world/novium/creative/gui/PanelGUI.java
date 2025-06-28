@@ -1,16 +1,28 @@
 package world.novium.creative.gui;
 
+import com.google.inject.Inject;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import world.novium.creative.managers.PlotManager;
 import world.novium.creative.managers.WorldManager;
 import world.novium.creative.utils.MessageUtils;
 
+@RequiredArgsConstructor
 public class PanelGUI {
-    public static Gui buildGUI(Player player) {
+    @Inject
+    private WorldManager worldManager;
+
+    @Inject
+    private PlotManager plotManager;
+
+    @Inject
+    private SnapshotGUI snapshotGui;
+
+    public Gui buildGUI(Player player) {
         Gui gui = Gui.gui()
                 .title(MessageUtils.parse("<gradient:#ff0000:#ff9900>Creative Hub</gradient>"))
                 .rows(2)
@@ -23,45 +35,45 @@ public class PanelGUI {
                         "<gray>Erstelle eine neue Welt, um deine Bauprojekte zu starten."
                 ))
                 .asGuiItem(event -> {
-                    if (WorldManager.worldExists(WorldManager.getWorldName(player))) {
+                    if (worldManager.worldExists(worldManager.getWorldName(player))) {
                         gui.close(player);
-                        player.sendMessage(MessageUtils.parse("<red>Du hast bereits eine Welt erstellt!"));
+                        MessageUtils.send(player, "<red>Du hast bereits eine Welt erstellt!");
                         return;
                     }
 
-                    WorldManager.createWorld(player);
-                    player.sendMessage(MessageUtils.parse("<green>Welt erfolgreich erstellt!"));
+                    worldManager.createWorld(player);
+                    MessageUtils.send(player, "<green>Welt erfolgreich erstellt!");
 
-                    player.teleport(WorldManager.getLoadedWorld(player).getSpawnLocation());
+                    player.teleport(worldManager.getLoadedWorld(player).getSpawnLocation());
                 });
 
         GuiItem tpWorld = ItemBuilder.from(Material.ENDER_PEARL)
                 .name(MessageUtils.parse("<green>Zur Welt teleportieren"))
                 .asGuiItem(event -> {
-                    if (!WorldManager.worldExists(WorldManager.getWorldName(player))) {
+                    if (!worldManager.worldExists(worldManager.getWorldName(player))) {
                         gui.close(player);
-                        player.sendMessage(MessageUtils.parse("<red>Du hast noch keine Welt erstellt!"));
+                        MessageUtils.send(player, "<red>Du hast noch keine Welt erstellt!");
                         return;
                     }
 
-                    WorldManager.loadWorld(player);
-                    player.sendMessage(MessageUtils.parse("<green>Teleportiere dich zur Welt..."));
-                    player.teleport(WorldManager.getLoadedWorld(player).getSpawnLocation());
+                    worldManager.loadWorld(player);
+                    MessageUtils.send(player, "<green>Teleportiere dich zur Welt...");
+                    player.teleport(worldManager.getLoadedWorld(player).getSpawnLocation());
                 });
         GuiItem deleteWorld = ItemBuilder.from(Material.TNT)
                 .name(MessageUtils.parse("<red>Welt löschen"))
                 .asGuiItem(event -> {
-                    if (!WorldManager.worldExists(WorldManager.getWorldName(player))) {
+                    if (!worldManager.worldExists(worldManager.getWorldName(player))) {
                         gui.close(player);
-                        player.sendMessage(MessageUtils.parse("<red>Du hast noch keine Welt erstellt!"));
+                        MessageUtils.send(player, "<red>Du hast noch keine Welt erstellt!");
                         return;
                     }
 
-                    boolean success = WorldManager.deleteWorld(player);
+                    boolean success = worldManager.deleteWorld(player);
                     if (success) {
-                        player.sendMessage(MessageUtils.parse("<green>Welt erfolgreich gelöscht!"));
+                        MessageUtils.send(player, "<green>Welt erfolgreich gelöscht!");
                     } else {
-                        player.sendMessage(MessageUtils.parse("<red>Fehler beim Löschen der Welt!"));
+                        MessageUtils.send(player, "<red>Fehler beim Löschen der Welt!");
                     }
                 });
 
@@ -70,10 +82,7 @@ public class PanelGUI {
                 .lore(MessageUtils.parse(
                         "<gray>Verwalte Snapshots deiner Welt, um verschiedene Bauphasen zu speichern."
                 ))
-                .asGuiItem(event -> {
-                    Gui snapshotsGui = SnapshotGUI.buildSnapshotGUI(player, 0);
-                    snapshotsGui.open(player);
-                });
+                .asGuiItem(event -> snapshotGui.buildSnapshotGUI(player, 0).open(player));
 
         GuiItem createPlot = ItemBuilder.from(Material.GRASS_BLOCK)
                 .name(MessageUtils.parse("<green>Grundstück erstellen"))
@@ -81,24 +90,20 @@ public class PanelGUI {
                         "<gray>Erstelle ein neues Grundstück, um deine Bauprojekte zu starten."
                 ))
                 .asGuiItem(event -> {
-                    PlotManager plotManager = PlotManager.getInstance();
-
                     if (plotManager.getPlots(player).isEmpty()) {
                         player.performCommand("p auto");
-                        player.sendMessage(MessageUtils.parse("<green>Grundstück erfolgreich erstellt!"));
+                        MessageUtils.send(player, "<green>Grundstück erfolgreich erstellt!");
                     } else {
-                        player.sendMessage(MessageUtils.parse("<red>Du hast bereits ein Grundstück!"));
+                        MessageUtils.send(player, "<red>Du hast bereits ein Grundstück!");
                     }
                 });
 
         GuiItem tpPlot = ItemBuilder.from(Material.COMPASS)
                 .name(MessageUtils.parse("<green>Zum Grundstück teleportieren"))
                 .asGuiItem(event -> {
-                    PlotManager plotManager = PlotManager.getInstance();
-
                     if (plotManager.getPlots(player).isEmpty()) {
                         gui.close(player);
-                        player.sendMessage(MessageUtils.parse("<red>Du hast noch kein Grundstück erstellt!"));
+                        MessageUtils.send(player, "<red>Du hast noch kein Grundstück erstellt!");
                         return;
                     }
 
@@ -108,12 +113,9 @@ public class PanelGUI {
         GuiItem deletePlot = ItemBuilder.from(Material.BARRIER)
                 .name(MessageUtils.parse("<red>Grundstück löschen"))
                 .asGuiItem(event -> {
-
-                    PlotManager plotManager = PlotManager.getInstance();
-
                     if (plotManager.getPlots(player).isEmpty()) {
                         gui.close(player);
-                        player.sendMessage(MessageUtils.parse("<red>Du hast noch kein Grundstück erstellt!"));
+                        MessageUtils.send(player, "<red>Du hast noch kein Grundstück erstellt!");
                         return;
                     }
 

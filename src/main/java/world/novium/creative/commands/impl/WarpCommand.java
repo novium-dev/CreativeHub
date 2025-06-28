@@ -1,5 +1,6 @@
 package world.novium.creative.commands.impl;
 
+import com.google.inject.Inject;
 import dev.jorel.commandapi.CommandTree;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.GreedyStringArgument;
@@ -7,22 +8,24 @@ import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.triumphteam.gui.guis.Gui;
 import world.novium.creative.commands.Command;
+import world.novium.creative.annotations.RegisterCommand;
 import world.novium.creative.gui.WarpGUI;
 import world.novium.creative.managers.WarpManager;
 import world.novium.creative.utils.MessageUtils;
 
+@RegisterCommand
 public class WarpCommand implements Command {
-    private final WarpManager manager;
+    @Inject
+    private WarpGUI warpGUI;
 
-    public WarpCommand(WarpManager manager) {
-        this.manager = manager;
-    }
+    @Inject
+    private WarpManager manager;
 
     @Override
     public CommandTree build() {
         return new CommandTree("warp")
                 .executesPlayer((player, args) -> {
-                    Gui gui = WarpGUI.buildGUI(player, manager);
+                    Gui gui = warpGUI.buildGUI(player);
 
                     gui.open(player);
                 })

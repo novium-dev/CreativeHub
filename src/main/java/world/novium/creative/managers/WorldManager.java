@@ -1,6 +1,9 @@
 package world.novium.creative.managers;
 
 
+import com.google.inject.Inject;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
@@ -8,6 +11,7 @@ import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 import world.novium.creative.CreativePlugin;
 import world.novium.creative.utils.FlatWorldGenerator;
+import world.novium.creative.utils.MessageUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,15 +27,42 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+@Getter
+@RequiredArgsConstructor
 public class WorldManager {
 
-    private static final Map<String, World> loadedWorlds = new HashMap<>();
-    private static final File SNAPSHOT_DIR = Bukkit.getWorldContainer().toPath().resolve("snapshots").toFile();
+    @Inject
+    public CreativePlugin plugin;
 
-    public static boolean createSnapshot(UUID uuid, String snapshotName) {
+    private final Map<String, World> loadedWorlds = new HashMap<>();
+    private final File SNAPSHOT_DIR = Bukkit.getWorldContainer().toPath().resolve("snapshots").toFile();
+
+    public void createSnapshot(UUID uuid, String snapshotName) {
+        // unload world if it is loaded
+        World world = Bukkit.getWorld("world_" + uuid);
+
+        if (world != null) {
+            Bukkit.unloadWorld(world, true);
+
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                executeSnapshot(uuid, snapshotName);
+                // load the world again after snapshot creation
+                if (!worldExists("world_" + uuid)) {
+                    generateWorld("world_" + uuid);
+                } else {
+                    Bukkit.createWorld(new WorldCreator("world_" + uuid));
+                }
+            }, 20L);
+        } else {
+            // if world is not loaded, just create the snapshot
+            executeSnapshot(uuid, snapshotName);
+        }
+    }
+
+    public void executeSnapshot(UUID uuid, String snapshotName) {
         File worldFolder = getWorldFolder(uuid);
         File snapshotFolder = new File(SNAPSHOT_DIR, "world_" + uuid);
-        if (!snapshotFolder.exists() && !snapshotFolder.mkdirs()) return false;
+        if (!snapshotFolder.exists() && !snapshotFolder.mkdirs()) return;
 
         File zipFile = new File(snapshotFolder, snapshotName + ".zip");
 
@@ -49,14 +80,22 @@ public class WorldManager {
                             e.printStackTrace();
                         }
                     });
-            return true;
+
+            Player player = Bukkit.getPlayer(uuid);
+
+            if (player != null) {
+                MessageUtils.send(player, "<green>Snapshot " + snapshotName + " wurde erfolgreich erstellt.");
+            }
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) {
+                MessageUtils.send(player, "<red>Fehler beim Erstellen des Snapshots: " + e.getMessage());
+            }
         }
     }
 
-    public static boolean loadSnapshot(UUID uuid, String snapshotName) {
+    public boolean loadSnapshot(UUID uuid, String snapshotName) {
         File worldFolder = getWorldFolder(uuid);
         File snapshotZip = new File(new File(SNAPSHOT_DIR, "world_" + uuid), snapshotName + ".zip");
 
@@ -96,32 +135,32 @@ public class WorldManager {
         }
     }
 
-    public static String[] listSnapshots(UUID uuid) {
+    public String[] listSnapshots(UUID uuid) {
         File folder = new File(SNAPSHOT_DIR, "world_" + uuid);
         if (!folder.exists()) return new String[0];
 
         return folder.list((dir, name) -> name.endsWith(".zip"));
     }
 
-    public static boolean deleteSnapshot(UUID uuid, String snapshotName) {
+    public boolean deleteSnapshot(UUID uuid, String snapshotName) {
         File snapshotFile = new File(new File(SNAPSHOT_DIR, "world_" + uuid), snapshotName + ".zip");
         return snapshotFile.exists() && snapshotFile.delete();
     }
 
-    public static boolean worldExists(String name) {
+    public boolean worldExists(String name) {
         return Bukkit.getWorldContainer().toPath().resolve(name).toFile().exists();
     }
 
-    public static String getWorldName(Player player) {
+    public String getWorldName(Player player) {
         return "world_" + player.getUniqueId();
     }
 
-    public static File getWorldFolder(UUID uuid) {
+    public File getWorldFolder(UUID uuid) {
         String worldName = "world_" + uuid;
         return Bukkit.getWorldContainer().toPath().resolve(worldName).toFile();
     }
 
-    public static void generateWorld(String name) {
+    public void generateWorld(String name) {
         World world = Bukkit.createWorld(new WorldCreator(name)
                 .generator(new FlatWorldGenerator()));
 
@@ -135,7 +174,7 @@ public class WorldManager {
         }
     }
 
-    public static void createWorld(Player player) {
+    public void createWorld(Player player) {
         String name = getWorldName(player);
 
         if (worldExists(name)) return;
@@ -143,7 +182,7 @@ public class WorldManager {
         generateWorld(name);
     }
 
-    public static void loadWorld(Player player) {
+    public void loadWorld(Player player) {
         String name = getWorldName(player);
 
         if (loadedWorlds.containsKey(name)) {
@@ -156,7 +195,7 @@ public class WorldManager {
         generateWorld(name);
     }
 
-    public static void unloadWorld(Player player, boolean save) {
+    public void unloadWorld(Player player, boolean save) {
         String name = getWorldName(player);
 
         World world = loadedWorlds.remove(name);
@@ -165,7 +204,7 @@ public class WorldManager {
         }
     }
 
-    public static boolean deleteWorld(Player player) {
+    public boolean deleteWorld(Player player) {
         String name = getWorldName(player);
 
         World world = Bukkit.getWorld(name);
@@ -179,7 +218,7 @@ public class WorldManager {
         if (worldExists(name)) {
             System.out.println("Deleting world: " + name);
             Bukkit.unloadWorld(name, false);
-            Bukkit.getScheduler().runTaskLater(CreativePlugin.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 if (deleteWorldDirectory(name)) {
                     System.out.println("World directory deleted successfully: " + name);
                 } else {
@@ -192,17 +231,17 @@ public class WorldManager {
         return false;
     }
 
-    public static World getLoadedWorld(Player player) {
+    public World getLoadedWorld(Player player) {
         String name = getWorldName(player);
         return loadedWorlds.get(name);
     }
 
-    public static World getLoadedWorld(String name) {
+    public World getLoadedWorld(String name) {
         return loadedWorlds.get(name);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static boolean deleteWorldDirectory(String worldName) {
+    public boolean deleteWorldDirectory(String worldName) {
         File worldFolder = Bukkit.getWorldContainer().toPath().resolve(worldName).toFile();
         try {
             Files.walk(worldFolder.toPath())
@@ -210,7 +249,7 @@ public class WorldManager {
                     .map(Path::toFile)
                     .forEach(File::delete);
         } catch (IOException e) {
-            CreativePlugin.getInstance().getLogger().warning("Failed to delete world directory: " + worldName);
+            plugin.getLogger().warning("Failed to delete world directory: " + worldName);
             return false;
         }
         return !worldFolder.exists();

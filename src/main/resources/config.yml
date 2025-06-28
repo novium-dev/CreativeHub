@@ -4,5 +4,9 @@ backend:
   authToken: "your-auth-token"
 database:
   enabled: true
-  uri: "mongodb://localhost:27017"
-  database: "yourdb"
+  username: "your-db-username"
+  password: "your-db-password"
+  host: "localhost"
+  port: 5432
+  max-pool-size: 10
+  database: "your-database-name"

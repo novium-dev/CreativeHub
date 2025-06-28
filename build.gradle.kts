@@ -25,12 +25,23 @@ repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
 }
 
+val saduVersion = "2.3.2"
+
 val shadowDependencies = listOf(
     "dev.jorel:commandapi-bukkit-shade-mojang-mapped:$commandAPIVersion",
     "dev.triumphteam:triumph-gui:3.1.11",
     "io.javalin:javalin:6.6.0",
-    "dev.morphia.morphia:morphia-core:2.4.18",
-    "com.github.ben-manes.caffeine:caffeine:3.2.0"
+    "com.github.ben-manes.caffeine:caffeine:3.2.0",
+    "com.google.inject:guice:7.0.0",
+    "org.projectlombok:lombok:1.18.36",
+    "org.atteo.classindex:classindex:3.13",
+    "de.chojo.sadu:sadu-mariadb:$saduVersion",
+    "de.chojo.sadu:sadu-datasource:$saduVersion",
+    "de.chojo.sadu:sadu-queries:$saduVersion",
+    "de.chojo.sadu:sadu-updater:$saduVersion",
+    "com.zaxxer:HikariCP:6.3.0",
+    "org.mariadb.jdbc:mariadb-java-client:3.5.3"
+
 )
 
 dependencies {
@@ -40,6 +51,11 @@ dependencies {
         implementation(dependency)
         shadow(dependency)
     }
+
+    annotationProcessor("org.projectlombok:lombok:1.18.36")
+    annotationProcessor("org.atteo.classindex:classindex:3.13")
+
+
 
     implementation(platform("com.intellectualsites.bom:bom-newest:1.52"))
     compileOnly("com.intellectualsites.plotsquared:plotsquared-core")

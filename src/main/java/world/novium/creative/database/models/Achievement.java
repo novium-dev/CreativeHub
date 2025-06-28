@@ -1,6 +1,9 @@
 package world.novium.creative.database.models;
 
-enum Achievement {
+import lombok.Getter;
+
+@Getter
+public enum Achievement {
     FIRST_LOGIN("First Login", "Welcome to Novium Creative!"),
     BUILDER("Builder", "Build your first structure"),
     EXPLORER("Explorer", "Explore 10 different plots"),
@@ -15,11 +18,4 @@ enum Achievement {
         this.description = description;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
 }
