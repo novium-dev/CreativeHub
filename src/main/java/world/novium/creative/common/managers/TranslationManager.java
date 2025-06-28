@@ -27,7 +27,7 @@ public class TranslationManager implements StartupHook {
 
         return translations.getOrDefault(locale, Collections.emptyList())
                 .stream()
-                .filter(translation -> translation.getKey().equals(key))
+                .filter(translation -> translation.key().equals(key))
                 .findFirst();
     }
 
@@ -35,7 +35,7 @@ public class TranslationManager implements StartupHook {
         Optional<Translation> translation = getTranslation(language, key);
 
         if (translation.isPresent()) {
-            return MessageUtils.parse(translation.get().getValue(), tagResolvers);
+            return MessageUtils.parse(translation.get().value(), tagResolvers);
         } else {
             log.warn("Translation for key '{}' in language '{}' not found.", key, language);
             return MessageUtils.parse(
