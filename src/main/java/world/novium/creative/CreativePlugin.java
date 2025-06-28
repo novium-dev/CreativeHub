@@ -2,6 +2,8 @@ package world.novium.creative;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import dev.triumphteam.gui.TriumphGui;
@@ -9,9 +11,13 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import world.novium.creative.common.StartupHook;
 import world.novium.creative.database.Database;
 import world.novium.creative.utils.GuiceModule;
 import world.novium.creative.utils.ServiceRegistry;
+
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @Accessors(fluent = true)
@@ -42,6 +48,15 @@ public class CreativePlugin extends JavaPlugin {
 
         injector = Guice.createInjector(new GuiceModule(this));
         this.registry = new ServiceRegistry(this, getClassLoader(), injector);
+
+        Set<StartupHook> startupHooks = injector.getInstance(
+                Key.get(
+                        new TypeLiteral<>() {}
+                )
+        );
+        for (StartupHook hook : startupHooks) {
+            hook.onStartup();
+        }
 
         CommandAPI.onEnable();
 

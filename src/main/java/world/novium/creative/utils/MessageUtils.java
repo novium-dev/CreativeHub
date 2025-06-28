@@ -4,6 +4,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
 public class MessageUtils {
     private static final MiniMessage mm = MiniMessage.miniMessage();
@@ -13,8 +14,12 @@ public class MessageUtils {
         return parse(prefix + " " + message);
     }
 
-    public static Component parse(String message) {
-        return mm.deserialize(message).decoration(TextDecoration.ITALIC, false);
+    public static Component parse(String message, TagResolver... tagResolvers) {
+        return mm.deserialize(message, tagResolvers).decoration(TextDecoration.ITALIC, false);
+    }
+
+    public static Component addPrefix(Component message) {
+        return mm.deserialize(prefix + " ").append(message).decoration(TextDecoration.ITALIC, false);
     }
 
     public static void send(Audience audience, String message) {
