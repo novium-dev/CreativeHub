@@ -1,1 +1,32 @@
-test: "<red>Test German</red>"
+test: "<red>Deutsche Translation</red>"
+
+world:
+  already_created: "<red>Du hast bereits eine Welt erstellt!"
+  created: "<green>Welt erfolgreich erstellt!</green>"
+  not_created: "<red>Du hast noch keine Welt erstellt!</red>"
+  teleporting: "<green>Teleportiere dich in deine Welt...</green>"
+  deleted: "<green>Welt erfolgreich gelöscht!</green>"
+  delete_failed: "<red>Fehler beim Löschen der Welt!</red>"
+plot:
+  created: "<green>Grundstück erfolgreich erstellt!</green>"
+  already_created: "<red>Du hast bereits ein Grundstück erstellt!</red>"
+  not_created: "<red>Du hast noch kein Grundstück erstellt!</red>"
+
+snapshot:
+  creating: "<green>Erstelle Snapshot <snapshot_name>...</green>"
+  created: "<green>Snapshot <name> erfolgreich erstellt!</green>"
+  create_failed: "<red>Fehler beim Erstellen des Snapshots <name>!</red>"
+  loading: "<green>Lade Snapshot...</green>"
+  loaded: "<green>Snapshot erfolgreich geladen!</green>"
+  load_error: "<red>Fehler beim Laden des Snapshots!</red>"
+  deleted: "<green>Snapshot erfolgreich gelöscht!</green>"
+  delete_error: "<red>Fehler beim Löschen des Snapshots!</red>"
+
+warp:
+  teleported: "<green>Teleportiert zu Warp <warp>!</green>"
+  name_empty: "<red>Warp-Name darf nicht leer sein!</red>"
+  name_exists: "<red>Ein Warp mit dem Namen <warp> existiert bereits!</red>"
+  deleted: "<green>Warp '<warp>' wurde gelöscht.</green>"
+  not_exists: "<red>Warp '<warp>' existiert nicht.</red>"
+  set: "<green>Warp '<warp>' wurde an deiner aktuellen Position erstellt. Stilierter Name: <styled>.</green>"
+  name_cannot_be_empty: "<red>Warp-Name darf nicht leer oder null sein.</red>"
