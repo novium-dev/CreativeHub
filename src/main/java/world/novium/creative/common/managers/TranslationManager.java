@@ -44,7 +44,7 @@ public class TranslationManager implements StartupHook {
         if (translation.isPresent()) {
             return MessageUtils.parse(translation.get().value(), tagResolvers);
         } else {
-            log.warn("Translation for key '{}' in language '{}' not found.", key, language);
+            log.warn("Translation for key '{}' in language '{}' not found.", key, language.toLanguageTag());
             return MessageUtils.parse(
                 String.format("<red>Translation missing for key <gray>'%s' <red>in language <gray>'%s'<red>.", key, language)
             );
@@ -98,6 +98,8 @@ public class TranslationManager implements StartupHook {
                     log.error("Translation key '{}' in file '{}' is null.", key, file.getName());
                 }
             }
+
+            log.info("Loaded {} translations for language '{}'.", translations.get(language).size(), languageCode);
         }
 
         log.info("Loaded {} languages with translations.", translations.size());

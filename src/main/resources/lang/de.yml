@@ -1,5 +1,10 @@
 test: "<red>Deutsche Translation</red>"
 
+lang:
+  reload:
+    success: "<green>Sprache erfolgreich neu geladen!</green>"
+    error: "<red>Fehler beim Neuladen der Sprache!</red>"
+
 world:
   already_created: "<red>Du hast bereits eine Welt erstellt!"
   created: "<green>Welt erfolgreich erstellt!</green>"
@@ -7,6 +12,8 @@ world:
   teleporting: "<green>Teleportiere dich in deine Welt...</green>"
   deleted: "<green>Welt erfolgreich gelöscht!</green>"
   delete_failed: "<red>Fehler beim Löschen der Welt!</red>"
+  lore:
+    create_world: "<gray>Erstelle eine neue Welt, um deine Bauprojekte zu starten."
 plot:
   created: "<green>Grundstück erfolgreich erstellt!</green>"
   already_created: "<red>Du hast bereits ein Grundstück erstellt!</red>"
@@ -31,3 +38,7 @@ warp:
   set: "<green>Warp '<warp>' wurde an deiner aktuellen Position erstellt. Stilierter Name: <styled>.</green>"
   name_cannot_be_empty: "<red>Warp-Name darf nicht leer oder null sein.</red>"
   teleport_lore: "<green>Teleportiere dich zu <warp></green>"
+
+settings:
+  set: "<green>Die Einstellung <gray><setting></gray> wurde auf <gray><value></gray> gesetzt.</green>"
+  get: "<green>Die Einstellung <gray><setting></gray> ist auf <gray><value></gray gesetzt.</green>"

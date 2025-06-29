@@ -6,6 +6,7 @@ import com.google.inject.multibindings.Multibinder;
 import lombok.AllArgsConstructor;
 import world.novium.creative.CreativePlugin;
 import world.novium.creative.common.StartupHook;
+import world.novium.creative.common.managers.SettingsManager;
 import world.novium.creative.database.UserCache;
 import world.novium.creative.database.UserDao;
 import world.novium.creative.gui.PanelGUI;
@@ -34,6 +35,10 @@ public class GuiceModule extends AbstractModule {
         WarpManager warpManager = new WarpManager(this.plugin);
         bind(WarpManager.class).toInstance(warpManager);
         startupBinder.addBinding().toInstance(warpManager);
+
+        SettingsManager settingsManager = new SettingsManager(this.plugin.getDataFolder());
+        bind(SettingsManager.class).toInstance(settingsManager);
+        startupBinder.addBinding().toInstance(settingsManager);
 
         UserDao userDao = new UserDao();
         bind(UserDao.class).toInstance(userDao);

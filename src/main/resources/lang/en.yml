@@ -1,1 +1,46 @@
-test: "<red>Test English</red>"
+test: "<red>English Translation</red>"
+
+lang:
+  reload:
+    success: "<green>Language successfully reloaded!</green>"
+    error: "<red>Error reloading language!</red>"
+
+world:
+  already_created: "<red>You have already created a world!</red>"
+  created: "<green>World successfully created!</green>"
+  not_created: "<red>You have not created a world yet!</red>"
+  teleporting: "<green>Teleporting to your world...</green>"
+  deleted: "<green>World successfully deleted!</green>"
+  delete_failed: "<red>Error deleting the world!</red>"
+  lore:
+    create_world: "<gray>Create a new world to start your building projects.</gray>"
+
+plot:
+  created: "<green>Plot successfully created!</green>"
+  already_created: "<red>You have already created a plot!</red>"
+  not_created: "<red>You have not created a plot yet!</red>"
+
+snapshot:
+  creating: "<green>Creating snapshot <snapshot_name>...</green>"
+  created: "<green>Snapshot <name> successfully created!</green>"
+  create_failed: "<red>Error creating snapshot <name>!</red>"
+  loading: "<green>Loading snapshot...</green>"
+  loaded: "<green>Snapshot successfully loaded!</green>"
+  load_error: "<red>Error loading snapshot!</red>"
+  deleted: "<green>Snapshot successfully deleted!</green>"
+  delete_error: "<red>Error deleting snapshot!</red>"
+
+warp:
+  teleported: "<green>Teleported to warp <warp>!</green>"
+  name_empty: "<red>Warp name must not be empty!</red>"
+  name_exists: "<red>A warp with the name <warp> already exists!</red>"
+  deleted: "<green>Warp '<warp>' has been deleted.</green>"
+  not_exists: "<red>Warp '<warp>' does not exist.</red>"
+  set: "<green>Warp '<warp>' has been set at your current position. Styled name: <styled>.</green>"
+  name_cannot_be_empty: "<red>Warp name must not be empty or null.</red>"
+  teleport_lore: "<green>Teleporting to <warp></green>"
+
+settings:
+  set: "<green>The setting <gray><setting></gray> has been set to <gray><value></gray>.</green>"
+  get: "<green>The setting <gray><setting></gray> is set to <gray><value></gray>.</green>"
+

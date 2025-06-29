@@ -35,9 +35,7 @@ public class PanelGUI {
 
         GuiItem createWorld = ItemBuilder.from(Material.RED_SAND)
                 .name(MessageUtils.parse("<green>Welt erstellen"))
-                .lore(MessageUtils.parse(
-                        "<gray>Erstelle eine neue Welt, um deine Bauprojekte zu starten."
-                ))
+                .lore(translator.translate(player, "world.lore.create_world"))
                 .asGuiItem(event -> {
                     if (worldManager.worldExists(worldManager.getWorldName(player))) {
                         gui.close(player);
