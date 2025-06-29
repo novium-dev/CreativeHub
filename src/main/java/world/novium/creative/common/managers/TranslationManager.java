@@ -21,13 +21,20 @@ public class TranslationManager implements StartupHook {
     private final File dataFolder;
 
     public Optional<Translation> getTranslation(Locale language, String key) {
-        Locale locale = translations.containsKey(language)
-                ? language
-                : Locale.ENGLISH;
-
-        return translations.getOrDefault(locale, Collections.emptyList())
+        Optional<Translation> translation = translations
+                .getOrDefault(language, Collections.emptyList())
                 .stream()
-                .filter(translation -> translation.key().equals(key))
+                .filter(t -> t.key().equals(key))
+                .findFirst();
+
+        if (translation.isPresent()) {
+            return translation;
+        }
+        
+        return translations
+                .getOrDefault(Locale.ENGLISH, Collections.emptyList())
+                .stream()
+                .filter(t -> t.key().equals(key))
                 .findFirst();
     }
 
