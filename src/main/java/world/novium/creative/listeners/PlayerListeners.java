@@ -17,12 +17,12 @@ public class PlayerListeners implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         userCache.join(event.getPlayer().getUniqueId());
-        event.joinMessage(MessageUtils.parse("<gray>[<green>+</green>] <white>" + event.getPlayer().getName() + " has joined the server!"));
+        event.joinMessage(MessageUtils.parse("<gray>[<green>+</green>] <white>" + event.getPlayer().getName()));
     }
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
-        event.quitMessage(MessageUtils.parse("<gray>[<red>-</red>] <white>" + event.getPlayer().getName() + " has left the server!"));
+        event.quitMessage(MessageUtils.parse("<gray>[<red>-</red>] <white>" + event.getPlayer().getName()));
         userCache.leave(event.getPlayer().getUniqueId());
     }
 

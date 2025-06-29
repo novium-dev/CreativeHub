@@ -69,8 +69,7 @@ public class CreativePlugin extends JavaPlugin {
 
         this.registry.registerAllListeners();
         this.registry.registerAllCommands();
-
-
+        
         var backendConfig = getConfig().getConfigurationSection("backend");
         boolean backendEnabled = backendConfig != null && backendConfig.getBoolean("enabled", false);
 
@@ -97,7 +96,6 @@ public class CreativePlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         CommandAPI.onDisable();
-
 
         if (server != null) {
             server.stop();

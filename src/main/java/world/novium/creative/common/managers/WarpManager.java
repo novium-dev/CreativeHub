@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import world.novium.creative.common.StartupHook;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +17,7 @@ import java.util.*;
 @Getter
 @RequiredArgsConstructor
 @Slf4j
-public class WarpManager {
+public class WarpManager implements StartupHook {
 
     private final JavaPlugin plugin;
     private final File file;
@@ -28,6 +29,10 @@ public class WarpManager {
         this.plugin = plugin;
         this.file = new File(plugin.getDataFolder(), "warps.yml");
         this.config = YamlConfiguration.loadConfiguration(file);
+    }
+
+    @Override
+    public void onStartup() {
         loadWarps();
     }
 

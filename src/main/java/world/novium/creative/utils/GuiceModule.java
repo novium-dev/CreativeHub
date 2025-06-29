@@ -22,23 +22,25 @@ public class GuiceModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(CreativePlugin.class).toInstance(this.plugin);
+        Multibinder<StartupHook> startupBinder =
+                Multibinder.newSetBinder(binder(), StartupHook.class);
 
+        bind(CreativePlugin.class).toInstance(this.plugin);
         bind(PlotManager.class).toInstance(new PlotManager());
-        bind(WarpManager.class).toInstance(new WarpManager(this.plugin));
         bind(PanelGUI.class).toInstance(new PanelGUI());
         bind(SnapshotGUI.class).toInstance(new SnapshotGUI());
         bind(WarpGUI.class).toInstance(new WarpGUI());
+
+        WarpManager warpManager = new WarpManager(this.plugin);
+        bind(WarpManager.class).toInstance(warpManager);
+        startupBinder.addBinding().toInstance(warpManager);
+
         UserDao userDao = new UserDao();
         bind(UserDao.class).toInstance(userDao);
         bind(UserCache.class).toInstance(new UserCache(userDao));
 
         TranslationManager translationService = new TranslationManager(this.plugin.getDataFolder());
-
         bind(TranslationManager.class).toInstance(translationService);
-
-        Multibinder<StartupHook> startupBinder =
-                Multibinder.newSetBinder(binder(), StartupHook.class);
         startupBinder.addBinding().toInstance(translationService);
     }
 }
