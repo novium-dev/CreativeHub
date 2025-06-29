@@ -30,3 +30,4 @@ warp:
   not_exists: "<red>Warp '<warp>' existiert nicht.</red>"
   set: "<green>Warp '<warp>' wurde an deiner aktuellen Position erstellt. Stilierter Name: <styled>.</green>"
   name_cannot_be_empty: "<red>Warp-Name darf nicht leer oder null sein.</red>"
+  teleport_lore: "<green>Teleportiere dich zu <warp></green>"

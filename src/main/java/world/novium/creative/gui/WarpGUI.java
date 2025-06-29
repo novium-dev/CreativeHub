@@ -52,11 +52,10 @@ public class WarpGUI {
             GuiItem warpItem = ItemBuilder.from(Material.ENDER_PEARL)
                     .name(MessageUtils.parse("<green>" + warp.name()))
                     .lore(
-                            MessageUtils.parse("<gray>Welt: <white>" + warp.location().getWorld().getName()),
-                            MessageUtils.parse("<gray>X: <white>" + warp.location().getBlockX()),
-                            MessageUtils.parse("<gray>Y: <white>" + warp.location().getBlockY()),
-                            MessageUtils.parse("<gray>Z: <white>" + warp.location().getBlockZ()),
-                            MessageUtils.parse("<yellow>Klicke zum Teleportieren!")
+                            translator.translate(player, "warp.teleport_lore",
+                                    TagResolver.builder()
+                                            .tag("warp", Tag.inserting(Component.text(warp.name())))
+                                            .build())
                     )
                     .asGuiItem(event -> {
                         player.teleport(warp.location());

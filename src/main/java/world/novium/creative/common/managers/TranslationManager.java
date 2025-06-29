@@ -30,7 +30,7 @@ public class TranslationManager implements StartupHook {
         if (translation.isPresent()) {
             return translation;
         }
-        
+
         return translations
                 .getOrDefault(Locale.ENGLISH, Collections.emptyList())
                 .stream()
