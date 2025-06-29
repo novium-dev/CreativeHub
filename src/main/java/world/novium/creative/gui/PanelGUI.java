@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import world.novium.creative.common.managers.PlotManager;
+import world.novium.creative.common.managers.TranslationManager;
 import world.novium.creative.common.managers.WorldManager;
 import world.novium.creative.utils.MessageUtils;
 
@@ -21,6 +22,9 @@ public class PanelGUI {
 
     @Inject
     private SnapshotGUI snapshotGui;
+
+    @Inject
+    private TranslationManager translator;
 
     public Gui buildGUI(Player player) {
         Gui gui = Gui.gui()
@@ -37,12 +41,12 @@ public class PanelGUI {
                 .asGuiItem(event -> {
                     if (worldManager.worldExists(worldManager.getWorldName(player))) {
                         gui.close(player);
-                        MessageUtils.send(player, "<red>Du hast bereits eine Welt erstellt!");
+                        translator.sendPrefixed(player, "world.already_created");
                         return;
                     }
 
                     worldManager.createWorld(player);
-                    MessageUtils.send(player, "<green>Welt erfolgreich erstellt!");
+                    translator.sendPrefixed(player, "world.created");
 
                     player.teleport(worldManager.getLoadedWorld(player).getSpawnLocation());
                 });
@@ -52,12 +56,12 @@ public class PanelGUI {
                 .asGuiItem(event -> {
                     if (!worldManager.worldExists(worldManager.getWorldName(player))) {
                         gui.close(player);
-                        MessageUtils.send(player, "<red>Du hast noch keine Welt erstellt!");
+                        translator.sendPrefixed(player, "world.not_created");
                         return;
                     }
 
                     worldManager.loadWorld(player);
-                    MessageUtils.send(player, "<green>Teleportiere dich zur Welt...");
+                    translator.sendPrefixed(player, "world.teleporting");
                     player.teleport(worldManager.getLoadedWorld(player).getSpawnLocation());
                 });
         GuiItem deleteWorld = ItemBuilder.from(Material.TNT)
@@ -65,15 +69,15 @@ public class PanelGUI {
                 .asGuiItem(event -> {
                     if (!worldManager.worldExists(worldManager.getWorldName(player))) {
                         gui.close(player);
-                        MessageUtils.send(player, "<red>Du hast noch keine Welt erstellt!");
+                        translator.sendPrefixed(player, "world.not_created");
                         return;
                     }
 
                     boolean success = worldManager.deleteWorld(player);
                     if (success) {
-                        MessageUtils.send(player, "<green>Welt erfolgreich gelöscht!");
+                        translator.sendPrefixed(player, "world.deleted");
                     } else {
-                        MessageUtils.send(player, "<red>Fehler beim Löschen der Welt!");
+                        translator.sendPrefixed(player, "world.delete_failed");
                     }
                 });
 
@@ -92,9 +96,10 @@ public class PanelGUI {
                 .asGuiItem(event -> {
                     if (plotManager.getPlots(player).isEmpty()) {
                         player.performCommand("p auto");
-                        MessageUtils.send(player, "<green>Grundstück erfolgreich erstellt!");
+                        translator.sendPrefixed(player, "plot.created");
                     } else {
-                        MessageUtils.send(player, "<red>Du hast bereits ein Grundstück!");
+                        gui.close(player);
+                        translator.sendPrefixed(player, "plot.already_created");
                     }
                 });
 
@@ -103,7 +108,7 @@ public class PanelGUI {
                 .asGuiItem(event -> {
                     if (plotManager.getPlots(player).isEmpty()) {
                         gui.close(player);
-                        MessageUtils.send(player, "<red>Du hast noch kein Grundstück erstellt!");
+                        translator.sendPrefixed(player, "plot.not_created");
                         return;
                     }
 
@@ -115,7 +120,7 @@ public class PanelGUI {
                 .asGuiItem(event -> {
                     if (plotManager.getPlots(player).isEmpty()) {
                         gui.close(player);
-                        MessageUtils.send(player, "<red>Du hast noch kein Grundstück erstellt!");
+                        translator.sendPrefixed(player, "plot.not_created");
                         return;
                     }
 

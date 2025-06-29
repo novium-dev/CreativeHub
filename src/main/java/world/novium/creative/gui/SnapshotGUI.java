@@ -5,9 +5,12 @@ import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import world.novium.creative.common.managers.TranslationManager;
 import world.novium.creative.common.managers.WorldManager;
 import world.novium.creative.utils.MessageUtils;
 
@@ -25,6 +28,9 @@ public class SnapshotGUI {
 
     @Inject
     private PanelGUI panelGUI;
+
+    @Inject
+    private TranslationManager translator;
 
     public Gui buildSnapshotGUI(Player player, int page) {
         Gui gui = Gui.gui()
@@ -65,11 +71,11 @@ public class SnapshotGUI {
                     String snapshotName = "snapshot_" + timestamp;
 
                     gui.close(player);
-                    player.sendMessage(MessageUtils.parse("<yellow>Erstelle Snapshot..."));
 
                     worldManager.createSnapshot(player.getUniqueId(), snapshotName);
-
-                    player.sendMessage(MessageUtils.parse("<green>Snapshot" + " '" + snapshotName + "' wird erstellt..."));
+                    translator.translate(player, "snapshot.creating", TagResolver.builder().tag(
+                            "snapshot_name", Tag.inserting(Component.text(snapshotName)
+                            )).build());
                 }));
 
         addNavigationItems(gui, player, page, snapshots);
@@ -116,16 +122,16 @@ public class SnapshotGUI {
                         if (event.getClick() == ClickType.LEFT) {
                             // Load snapshot
                             gui.close(player);
-                            player.sendMessage(MessageUtils.parse("<yellow>Lade Snapshot..."));
+                            translator.translate(player, "snapshot.loading");
 
                             if (worldManager.loadSnapshot(player.getUniqueId(), displayName)) {
-                                player.sendMessage(MessageUtils.parse("<green>Snapshot erfolgreich geladen!"));
+                                translator.translate(player, "snapshot.loaded");
                                 worldManager.loadWorld(player);
                                 if (worldManager.getLoadedWorld(player) != null) {
                                     player.teleport(worldManager.getLoadedWorld(player).getSpawnLocation());
                                 }
                             } else {
-                                player.sendMessage(MessageUtils.parse("<red>Fehler beim Laden des Snapshots!"));
+                                translator.translate(player, "snapshot.load_error");
                             }
                         } else if (event.getClick() == ClickType.RIGHT) {
                             openDeleteConfirmation(player, displayName);
@@ -164,9 +170,9 @@ public class SnapshotGUI {
                     confirmGui.close(player);
 
                     if (worldManager.deleteSnapshot(player.getUniqueId(), snapshotName)) {
-                        player.sendMessage(MessageUtils.parse("<green>Snapshot erfolgreich gelöscht!"));
+                        translator.translate(player, "snapshot.deleted");
                     } else {
-                        player.sendMessage(MessageUtils.parse("<red>Fehler beim Löschen des Snapshots!"));
+                        translator.translate(player, "snapshot.delete_error");
                     }
 
                     buildSnapshotGUI(player, 0).open(player);

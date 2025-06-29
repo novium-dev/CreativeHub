@@ -82,7 +82,7 @@ public class TranslationManager implements StartupHook {
             Locale language = Locale.forLanguageTag(languageCode);
 
             YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-            for (String key : config.getKeys(false)) {
+            for (String key : config.getKeys(true)) {
                 String message = config.getString(key);
                 if (message != null) {
                     Translation translation = new Translation(key, message);

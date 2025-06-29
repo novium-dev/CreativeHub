@@ -4,6 +4,10 @@ package world.novium.creative.common.managers;
 import com.google.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
@@ -11,8 +15,6 @@ import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 import world.novium.creative.CreativePlugin;
 import world.novium.creative.utils.FlatWorldGenerator;
-import world.novium.creative.utils.MessageUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -29,10 +31,14 @@ import java.util.zip.ZipOutputStream;
 
 @Getter
 @RequiredArgsConstructor
+@Slf4j
 public class WorldManager {
 
     @Inject
     public CreativePlugin plugin;
+
+    @Inject
+    private TranslationManager translator;
 
     private final Map<String, World> loadedWorlds = new HashMap<>();
     private final File SNAPSHOT_DIR = Bukkit.getWorldContainer().toPath().resolve("snapshots").toFile();
@@ -84,13 +90,15 @@ public class WorldManager {
             Player player = Bukkit.getPlayer(uuid);
 
             if (player != null) {
-                MessageUtils.send(player, "<green>Snapshot " + snapshotName + " wurde erfolgreich erstellt.");
+                translator.sendPrefixed(player, "snapshot.created",
+                        TagResolver.builder().tag("name", Tag.inserting(Component.text(snapshotName))).build());
             }
         } catch (IOException e) {
             e.printStackTrace();
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
-                MessageUtils.send(player, "<red>Fehler beim Erstellen des Snapshots: " + e.getMessage());
+                translator.sendPrefixed(player, "snapshot.create_failed",
+                        TagResolver.builder().tag("name", Tag.inserting(Component.text(snapshotName))).build());
             }
         }
     }
@@ -210,19 +218,19 @@ public class WorldManager {
         World world = Bukkit.getWorld(name);
         if (world != null) {
             world.getPlayers().forEach(p -> {
-                p.sendMessage("Your world is being deleted. You will be teleported to the main world.");
+                translator.sendPrefixed(p, "world.deleted");
                 p.teleport(Bukkit.getWorlds().getFirst().getSpawnLocation());
             });
         }
 
         if (worldExists(name)) {
-            System.out.println("Deleting world: " + name);
+            log.info("Deleting world: {}", name);
             Bukkit.unloadWorld(name, false);
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 if (deleteWorldDirectory(name)) {
-                    System.out.println("World directory deleted successfully: " + name);
+                    log.info("World directory deleted successfully: {}", name);
                 } else {
-                    System.out.println("Failed to delete world directory: " + name);
+                    log.error("Failed to delete world directory: {}", name);
                 }
             }, 20L);
             loadedWorlds.remove(name);

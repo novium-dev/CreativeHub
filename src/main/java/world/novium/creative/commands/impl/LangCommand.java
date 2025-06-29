@@ -28,7 +28,7 @@ public class LangCommand implements Command {
                         .then(new GreedyStringArgument("message")
                                 .executesPlayer((player, args) -> {
                                     String message = Objects.requireNonNull(args.get("message").toString());
-                                    translator.send(player, message);
+                                    translator.sendPrefixed(player, message);
                                 })
                         )
                 );

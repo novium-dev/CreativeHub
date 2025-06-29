@@ -4,8 +4,12 @@ import com.google.inject.Inject;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import world.novium.creative.common.managers.TranslationManager;
 import world.novium.creative.common.managers.WarpManager;
 import world.novium.creative.utils.MessageUtils;
 
@@ -15,6 +19,10 @@ public class WarpGUI {
 
     @Inject
     private WarpManager warpManager;
+
+
+    @Inject
+    private TranslationManager translator;
 
     /**
      * Builds and returns a GUI for displaying warps.
@@ -53,7 +61,9 @@ public class WarpGUI {
                     .asGuiItem(event -> {
                         player.teleport(warp.location());
                         gui.close(player);
-                        MessageUtils.send(player, "<green>Du wurdest zu Warp " + warp.name() + " teleportiert!");
+                        translator.sendPrefixed(player, "warp.teleported", TagResolver.builder().tag(
+                                "warp", Tag.inserting(Component.text(warp.name())
+                        )).build());
                     });
 
             gui.setItem(slot, warpItem);
