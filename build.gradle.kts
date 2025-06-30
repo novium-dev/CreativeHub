@@ -41,15 +41,13 @@ val shadowDependencies = listOf(
     "de.chojo.sadu:sadu-updater:$saduVersion",
     "com.zaxxer:HikariCP:6.3.0",
     "org.mariadb.jdbc:mariadb-java-client:3.5.3"
-
 )
 
 dependencies {
     paperweight.paperDevBundle("$mcVersion-R0.1-SNAPSHOT")
 
     shadowDependencies.forEach { dependency ->
-        implementation(dependency)
-        shadow(dependency)
+        paperLibrary(dependency)
     }
 
     annotationProcessor("org.projectlombok:lombok:1.18.36")
@@ -58,6 +56,7 @@ dependencies {
     implementation(platform("com.intellectualsites.bom:bom-newest:1.52"))
     compileOnly("com.intellectualsites.plotsquared:plotsquared-core")
     compileOnly("com.intellectualsites.plotsquared:plotsquared-bukkit") { isTransitive = false }
+    compileOnly("net.luckperms:api:5.4")
 }
 
 
@@ -84,8 +83,10 @@ java {
 
 paper {
     main = "world.novium.creative.CreativePlugin"
+    loader = "world.novium.creative.DependencyLoader"
     apiVersion = "1.19"
     authors = listOf("InvalidJoker")
+    generateLibrariesJson = true
 
     serverDependencies {
         register("PlotSquared") {

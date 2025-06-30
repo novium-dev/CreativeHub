@@ -31,7 +31,7 @@ public class SettingsCommand implements Command {
                                 new LiteralArgument("set")
                                         .withPermission("novium.creative.settings.maintenance.set")
                                         .then(new BooleanArgument("enabled")
-                                                .executesPlayer((player, args) -> {
+                                                .executes((player, args) -> {
                                                     boolean enabled = (boolean) args.get("enabled");
 
                                                     Settings settings = settingsManager.getSettings();
@@ -47,7 +47,7 @@ public class SettingsCommand implements Command {
                                         )
                         )
                         .then(new LiteralArgument("get")
-                                .executesPlayer((player, args) -> {
+                                .executes((player, args) -> {
                                     Settings settings = settingsManager.getSettings();
                                     boolean enabled = settings.isMaintenanceMode();
                                     translator.sendPrefixed(player, "settings.get",

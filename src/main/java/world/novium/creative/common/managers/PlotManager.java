@@ -22,4 +22,11 @@ public class PlotManager {
         PlotPlayer<?> plotPlayer = PlotPlayer.from(player);
         return plotAPI.getPlayerPlots(plotPlayer);
     }
+
+    public Plot getPlot(Player player) {
+        Set<Plot> plots = getPlots(player);
+        return plots.isEmpty() ? null : plots.iterator().next();
+    }
+
+
 }

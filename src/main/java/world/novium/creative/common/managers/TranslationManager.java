@@ -2,6 +2,7 @@ package world.novium.creative.common.managers;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -51,19 +52,19 @@ public class TranslationManager implements StartupHook {
         }
     }
 
-    public Component translate(Player player, String key, TagResolver... tagResolvers) {
-        Locale language = player.locale();
+    public Component translate(Audience player, String key, TagResolver... tagResolvers) {
+        Locale language = player instanceof Player ? ((Player) player).locale() : Locale.ENGLISH;
 
         return getTranslationComponent(language, key, tagResolvers);
     }
 
-    public void send(Player player, String key, TagResolver... tagResolvers) {
+    public void send(Audience player, String key, TagResolver... tagResolvers) {
         Component translation = translate(player, key, tagResolvers);
 
         player.sendMessage(translation);
     }
 
-    public void sendPrefixed(Player player, String key, TagResolver... tagResolvers) {
+    public void sendPrefixed(Audience player, String key, TagResolver... tagResolvers) {
         Component translation = translate(player, key, tagResolvers);
 
         player.sendMessage(MessageUtils.addPrefix(translation));

@@ -6,15 +6,12 @@ import com.google.inject.multibindings.Multibinder;
 import lombok.AllArgsConstructor;
 import world.novium.creative.CreativePlugin;
 import world.novium.creative.common.StartupHook;
-import world.novium.creative.common.managers.SettingsManager;
+import world.novium.creative.common.managers.*;
 import world.novium.creative.database.UserCache;
 import world.novium.creative.database.UserDao;
 import world.novium.creative.gui.PanelGUI;
 import world.novium.creative.gui.SnapshotGUI;
 import world.novium.creative.gui.WarpGUI;
-import world.novium.creative.common.managers.PlotManager;
-import world.novium.creative.common.managers.TranslationManager;
-import world.novium.creative.common.managers.WarpManager;
 
 @AllArgsConstructor
 public class GuiceModule extends AbstractModule {
@@ -43,6 +40,10 @@ public class GuiceModule extends AbstractModule {
         UserDao userDao = new UserDao();
         bind(UserDao.class).toInstance(userDao);
         bind(UserCache.class).toInstance(new UserCache(userDao));
+
+        TeamManager teamManager = new TeamManager(this.plugin);
+        bind(TeamManager.class).toInstance(teamManager);
+        startupBinder.addBinding().toInstance(teamManager);
 
         TranslationManager translationService = new TranslationManager(this.plugin.getDataFolder());
         bind(TranslationManager.class).toInstance(translationService);
