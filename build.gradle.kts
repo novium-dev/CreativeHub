@@ -29,7 +29,6 @@ val saduVersion = "2.3.2"
 
 val shadowDependencies = listOf(
     "dev.jorel:commandapi-bukkit-shade-mojang-mapped:$commandAPIVersion",
-    "dev.triumphteam:triumph-gui:3.1.11",
     "io.javalin:javalin:6.6.0",
     "com.github.ben-manes.caffeine:caffeine:3.2.0",
     "com.google.inject:guice:7.0.0",
@@ -49,6 +48,9 @@ dependencies {
     shadowDependencies.forEach { dependency ->
         paperLibrary(dependency)
     }
+
+    implementation("dev.triumphteam:triumph-gui:3.1.11")
+    shadow("dev.triumphteam:triumph-gui:3.1.11")
 
     annotationProcessor("org.projectlombok:lombok:1.18.36")
     annotationProcessor("org.atteo.classindex:classindex:3.13")

@@ -38,6 +38,10 @@ public class CreativePlugin extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
 
+        CommandAPI.onEnable();
+
+        TriumphGui.init(this);
+
         var databaseConfig = getConfig().getConfigurationSection("database");
 
         if (databaseConfig == null || !databaseConfig.getBoolean("enabled", false)) {
@@ -60,10 +64,6 @@ public class CreativePlugin extends JavaPlugin {
         for (StartupHook hook : startupHooks) {
             hook.onStartup();
         }
-
-        CommandAPI.onEnable();
-
-        TriumphGui.init(this);
 
         Bukkit.getServicesManager().register(ServiceRegistry.class, registry, this, ServicePriority.Normal);
 

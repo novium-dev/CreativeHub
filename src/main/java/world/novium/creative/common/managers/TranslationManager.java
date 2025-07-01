@@ -17,11 +17,11 @@ import java.util.*;
 @AllArgsConstructor
 @Slf4j
 public class TranslationManager implements StartupHook {
-    private final Map<Locale, List<Translation>> translations = new HashMap<>();
+    private final Map<String, List<Translation>> translations = new HashMap<>();
 
     private final File dataFolder;
 
-    public Optional<Translation> getTranslation(Locale language, String key) {
+    public Optional<Translation> getTranslation(String language, String key) {
         Optional<Translation> translation = translations
                 .getOrDefault(language, Collections.emptyList())
                 .stream()
@@ -32,15 +32,17 @@ public class TranslationManager implements StartupHook {
             return translation;
         }
 
+        log.warn("Translation for key '{}' in language '{}' not found, falling back to English.", key, language);
+
         return translations
-                .getOrDefault(Locale.ENGLISH, Collections.emptyList())
+                .getOrDefault(Locale.ENGLISH.toLanguageTag(), Collections.emptyList())
                 .stream()
                 .filter(t -> t.key().equals(key))
                 .findFirst();
     }
 
     public Component getTranslationComponent(Locale language, String key, TagResolver... tagResolvers) {
-        Optional<Translation> translation = getTranslation(language, key);
+        Optional<Translation> translation = getTranslation(language.toLanguageTag(), key);
 
         if (translation.isPresent()) {
             return MessageUtils.parse(translation.get().value(), tagResolvers);
@@ -87,20 +89,19 @@ public class TranslationManager implements StartupHook {
         for (File file : files) {
             log.info("Loading translations from file: {}", file.getName());
             String languageCode = file.getName().replace(".yaml", "");
-            Locale language = Locale.forLanguageTag(languageCode);
 
             YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
             for (String key : config.getKeys(true)) {
                 String message = config.getString(key);
                 if (message != null) {
                     Translation translation = new Translation(key, message);
-                    translations.computeIfAbsent(language, k -> new ArrayList<>()).add(translation);
+                    translations.computeIfAbsent(languageCode, k -> new ArrayList<>()).add(translation);
                 } else {
                     log.error("Translation key '{}' in file '{}' is null.", key, file.getName());
                 }
             }
 
-            log.info("Loaded {} translations for language '{}'.", translations.get(language).size(), languageCode);
+            log.info("Loaded {} translations for language '{}'.", translations.get(languageCode).size(), languageCode);
         }
 
         log.info("Loaded {} languages with translations.", translations.size());
