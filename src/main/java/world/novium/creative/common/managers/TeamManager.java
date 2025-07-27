@@ -95,7 +95,7 @@ public class TeamManager implements StartupHook {
     public void deleteTeam(Player player) {
         Team existingTeam = playerTeams.get(player.getUniqueId());
         if (existingTeam != null) {
-            existingTeam.unregister();
+            try { existingTeam.unregister(); } catch (IllegalStateException ignored) {}
             playerTeams.remove(player.getUniqueId());
         }
 
